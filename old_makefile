@@ -1,0 +1,16 @@
+all: nblocksc testnn
+
+test: clean all run_testnn
+
+nblocksc: nblocksc.cpp ; g++ -o nblocksc nblocksc.cpp -I.
+
+testnn: testnn.cpp ; g++ -o testnn testnn.cpp -I.
+
+run:
+	./nblocksc
+
+run_testnn:
+	./testnn
+
+clean:
+	rm -f *.o nblocksc testnn
