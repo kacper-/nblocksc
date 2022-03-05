@@ -9,7 +9,7 @@
 
 int const COUNT = 10;
 int const SIZE = 16;
-float const LF = 0.05;
+float const LF = 0.08;
 
 void print_result(float *result);
 void print_signal(float *result);
@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
 	};
 
-	train(&net, signal, expected, COUNT, 1);
+	train(&net, signal, expected, COUNT, 100000);
 
 	std::cout << "results..." << std::endl;
 	for(int i=0;i<COUNT;i++) {
@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
 
 void print_result(float *result) {
 	for(int i=0;i<SIZE;i++) {
-		std::cout << *(result + i) << " ";
+		printf("%.2f ", *(result + i));
 	}
 	std::cout << std::endl;
 }
