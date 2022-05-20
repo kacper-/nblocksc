@@ -11,8 +11,7 @@ int const COUNT = 10;
 int const SIZE = 16;
 float const LF = 0.08;
 
-void print_result(float *result);
-void print_signal(float *result);
+void print_vector(float *result);
 
 int main(int argc, char *argv[]) {
 	float result[SIZE];
@@ -52,9 +51,11 @@ int main(int argc, char *argv[]) {
 	std::cout << "results..." << std::endl;
 	for(int i=0;i<COUNT;i++) {
 		s = signal + (i * SIZE);
-		print_signal(s);
 		net.process(s, result);
-		print_result(result);
+		float diff[SIZE];
+		for(int j=0;j<SIZE;j++)
+			diff[j] = fabs(*(s+j) - *(result+j));
+		print_vector(diff);
 	}
 
 	std::cout << "finished." << std::endl;
@@ -62,17 +63,9 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-void print_result(float *result) {
+void print_vector(float *result) {
 	for(int i=0;i<SIZE;i++) {
-		printf("%.2f ", *(result + i));
+		printf("\t%.2f ", *(result + i));
 	}
 	std::cout << std::endl;
 }
-
-void print_signal(float *result) {
-	for(int i=0;i<SIZE;i++) {
-		std::cout << *(result + i) << " ";
-	}
-	std::cout << std::endl;
-}
-
