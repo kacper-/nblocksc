@@ -22,11 +22,11 @@ int main(int argc, char *argv[]) {
 
 	std::cout << "training..." << std::endl;
 
-	train(&net, signal, expected, COUNT, 50000);
+	train(&net, input_s, input_e, COUNT, 50000);
 
 	std::cout << "results..." << std::endl;
 	for(int i=0;i<COUNT;i++) {
-		s = signal + (i * SIZE);
+		s = input_s + (i * SIZE);
 		net.process(s, result);
 		float diff[SIZE];
 		for(int j=0;j<SIZE;j++)
