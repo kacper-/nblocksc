@@ -8,9 +8,9 @@
 #include"net_util.h"
 #include"testdata.h"
 
-float const LF = 0.08;
+float const LF = 0.1;
 
-void print_vector(float *result);
+void print_vector(float *s, float *result);
 
 int main(int argc, char *argv[]) {
 	float result[SIZE];
@@ -20,16 +20,13 @@ int main(int argc, char *argv[]) {
 
 	std::cout << "training..." << std::endl;
 
-	train(&net, input_s, input_e, COUNT, 50000);
+	train(&net, input_s, input_e, COUNT, 25000);
 
 	std::cout << "results..." << std::endl;
 	for(int i=0;i<COUNT;i++) {
 		s = input_s + (i * SIZE);
 		net.process(s, result);
-		float diff[SIZE];
-		for(int j=0;j<SIZE;j++)
-			diff[j] = fabs(*(s+j) - *(result+j));
-		print_vector(diff);
+		print_vector(s, result);
 	}
 
 	std::cout << "finished." << std::endl;
@@ -37,9 +34,30 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-void print_vector(float *result) {
+void print_vector(float *s, float *result) {
+	int index = 0;
+	float max = 0;
 	for(int i=0;i<SIZE;i++) {
-		printf("\t%.2f ", *(result + i));
+		if(*(result + i)>max) {
+			max = *(result + i);
+			index = i;
+		}
 	}
-	std::cout << std::endl;
+
+	char a = index + 65;
+
+	for(int i=0;i<SIZE;i++) {
+
+		if(i % 8 == 0) {
+			if(i==32)
+				printf("\n%c (%.2f) ", a, max);
+			else
+				printf("\n         ");
+		}
+		if(*(s + i) > 0.5)
+			printf("X");
+		else
+			printf(" ");
+	}
+	printf("\n");
 }
