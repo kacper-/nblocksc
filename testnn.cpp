@@ -8,7 +8,6 @@
 #include"net_util.h"
 #include"testdata.h"
 
-int const SIZE = 16;
 float const LF = 0.08;
 
 void print_vector(float *result);

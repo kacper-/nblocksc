@@ -1,3 +1,4 @@
+int const SIZE = 16;
 int const COUNT = 10;
 	
 float input_s[] = {
