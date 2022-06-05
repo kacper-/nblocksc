@@ -35,24 +35,43 @@ int main(int argc, char *argv[]) {
 }
 
 void print_vector(float *s, float *result) {
-	int index = 0;
-	float max = 0;
+	int index = 0, index2 = 0;
+	float max = 0, max2 = 0;
 	for(int i=0;i<SIZE;i++) {
 		if(*(result + i)>max) {
+			max2 = max;
+			index2 = index;
 			max = *(result + i);
 			index = i;
+		} else {
+			if(*(result + i)>max2) {
+				max2 = *(result + i);
+				index2 = i;
+			}
 		}
 	}
 
-	char a = index + 65;
+	char a, a2;
+	if(index>26)
+		a = index+48;
+	else
+		a = index+65;
+	if(index2>26)
+		a2 = index2+48;
+	else
+		a2 = index2+65;
 
 	for(int i=0;i<SIZE;i++) {
 
 		if(i % 8 == 0) {
-			if(i==32)
+			if(i==24)
 				printf("\n%c (%.2f) ", a, max);
-			else
-				printf("\n         ");
+			else {
+				if(i==32)
+					printf("\n%c (%.2f) ", a2, max2);
+			 	else 
+					printf("\n         ");
+			}
 		}
 		if(*(s + i) > 0.5)
 			printf("X");
