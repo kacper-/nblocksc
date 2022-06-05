@@ -99,6 +99,14 @@ float Layer::ac_f1(float x) {
 	return 1 / pow(1 + abs(x), 2);
 }
 
+// float Layer::ac_f(float x) {
+// 	return tanh(x);
+// }
+
+// float Layer::ac_f1(float x) {
+// 	return 1 - pow(tanh(x), 2);
+// }
+
 float Layer::combined_signal(int n) {
     float o = 0;
     int index = n * w_count;
