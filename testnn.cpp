@@ -6,6 +6,7 @@
  */
 
 #include"net_util.h"
+#include"sys/time.h"
 #include"testdata.h"
 
 float const LF = 0.1;
@@ -19,8 +20,10 @@ int main(int argc, char *argv[]) {
 	Net net(SIZE, SIZE, LF);
 
 	std::cout << "training..." << std::endl;
-
+	
+	time_t start = time(nullptr);
 	train(&net, input_s, input_e, COUNT, 25000);
+	time_t stop = time(nullptr);
 
 	std::cout << "results..." << std::endl;
 	for(int i=0;i<COUNT;i++) {
@@ -29,7 +32,7 @@ int main(int argc, char *argv[]) {
 		print_vector(s, result);
 	}
 
-	std::cout << "finished." << std::endl;
+	std::cout << "finished in " << stop-start << "s" << std::endl;
 
     return 0;
 }
@@ -62,7 +65,6 @@ void print_vector(float *s, float *result) {
 		a2 = index2+65;
 
 	for(int i=0;i<SIZE;i++) {
-
 		if(i % 8 == 0) {
 			if(i==24)
 				printf("\n%c (%.2f) ", a, max);
