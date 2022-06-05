@@ -12,6 +12,7 @@
 float const LF = 0.1;
 
 void print_vector(float *s, float *result);
+long get_millis();
 
 int main(int argc, char *argv[]) {
 	float result[SIZE];
@@ -21,9 +22,9 @@ int main(int argc, char *argv[]) {
 
 	std::cout << "training..." << std::endl;
 	
-	time_t start = time(nullptr);
+	long start = get_millis();
 	train(&net, input_s, input_e, COUNT, 25000);
-	time_t stop = time(nullptr);
+	long stop = get_millis();
 
 	std::cout << "results..." << std::endl;
 	for(int i=0;i<COUNT;i++) {
@@ -32,9 +33,15 @@ int main(int argc, char *argv[]) {
 		print_vector(s, result);
 	}
 
-	std::cout << "finished in " << stop-start << "s" << std::endl;
+	std::cout << std::endl << "finished in " << stop-start << " msec" << std::endl;
 
     return 0;
+}
+
+long get_millis() {
+	struct timeval tp;
+	gettimeofday(&tp, NULL);
+	return tp.tv_sec * 1000 + tp.tv_usec / 1000;
 }
 
 void print_vector(float *s, float *result) {
@@ -55,12 +62,12 @@ void print_vector(float *s, float *result) {
 	}
 
 	char a, a2;
-	if(index>26)
-		a = index+48;
+	if(index>25)
+		a = index+22;
 	else
 		a = index+65;
-	if(index2>26)
-		a2 = index2+48;
+	if(index2>25)
+		a2 = index2+22;
 	else
 		a2 = index2+65;
 
