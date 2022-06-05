@@ -58,16 +58,16 @@ void Net::process(float *signal, float *result) {
 }
 
 void Net::teach(float *signal, float *expected) {
-	float result[back->get_n_size()];
+	float result[back->n_count];
 	process(signal, result);
-	float back_error[back->get_n_size()];
-	calculate_back_error(result, expected, back->get_n_size(), back_error);
-	float middle2_error[middle2->get_w_size()];
-	calculate_error(back->weights, back_error, middle2->get_n_size(), middle2->get_w_size(), middle2_error);
-	float middle_error[middle->get_w_size()];
-	calculate_error(middle2->weights, middle2_error, middle->get_n_size(), middle->get_w_size(), middle_error);
-	float front_error[front->get_w_size()];
-	calculate_error(middle->weights, middle_error, front->get_n_size(), front->get_w_size(), front_error);
+	float back_error[back->n_count];
+	calculate_back_error(result, expected, back->n_count, back_error);
+	float middle2_error[middle2->w_count];
+	calculate_error(back->weights, back_error, middle2->n_count, middle2->w_count, middle2_error);
+	float middle_error[middle->w_count];
+	calculate_error(middle2->weights, middle2_error, middle->n_count, middle->w_count, middle_error);
+	float front_error[front->w_count];
+	calculate_error(middle->weights, middle_error, front->n_count, front->w_count, front_error);
     back->calculate_weight_deltas(back_error);
     middle2->calculate_weight_deltas(middle2_error);
     middle->calculate_weight_deltas(middle_error);
@@ -99,11 +99,11 @@ float* Net::calculate_error(float *weights, float *error, int n_size, int w_size
 }
 
 int Net::get_input_size() {
-	return front->get_w_size();
+	return front->w_count;
 }
 
 int Net::get_output_size() {
-	return back->get_n_size();
+	return back->n_count;
 }
 
 #endif /* NET_H_ */

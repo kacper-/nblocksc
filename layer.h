@@ -13,8 +13,6 @@
 
 class Layer {
 	float init_limit;
-	int n_count;
-	int w_count;
 	float lf;
 	float *deltas;
 	float *inputs;
@@ -22,7 +20,6 @@ class Layer {
     void init_weights();
     void init_inputs();
     void init_outputs();
-    int arr_pos(int, int);
     void save_inputs(float*);
     float ac_f(float);
     float ac_f1(float);
@@ -35,11 +32,11 @@ public:
 	~Layer();
 	float *outputs;
 	float *weights;
+    int n_count;
+	int w_count;
 	void process(float*);
 	void calculate_weight_deltas(float*);
 	void apply_weight_deltas();
-	int get_w_size();
-	int get_n_size();
 };
 
 Layer::Layer(int n_count, int w_count, float lf) {
@@ -61,17 +58,15 @@ Layer::~Layer() {
 	delete[] weights;
 }
 
-int Layer::arr_pos(int n, int w) {
-	return (n * w_count) + w;
-}
-
 void Layer::init_weights() {
     weights = new float[arr_size];
     deltas = new float[arr_size];
+    int index = 0;
     for (int n = 0; n < n_count; n++) {
         for (int w = 0; w < w_count; w++) {
-            weights[arr_pos(n, w)] = rand_float() * init_limit;
-            deltas[arr_pos(n, w)] = 0;
+            weights[index] = rand_float() * init_limit;
+            deltas[index] = 0;
+            index++;
         }
     }
 }
@@ -86,10 +81,8 @@ void Layer::init_outputs() {
 
 void Layer::process(float *signal) {
 	save_inputs(signal);
-    for (int n = 0; n < n_count; n++) {
-        outputs[n] = 0;
+    for (int n = 0; n < n_count; n++) 
         outputs[n] = ac_f(combined_signal(n));
-    }
 }
 
 void Layer::save_inputs(float *signal) {
@@ -108,51 +101,45 @@ float Layer::ac_f1(float x) {
 
 float Layer::combined_signal(int n) {
     float o = 0;
+    int index = n * w_count;
     for (int w = 0; w < w_count; w++) {
-        o += weights[arr_pos(n, w)] * inputs[w];
+        o += weights[index] * inputs[w];
+        index++;
     }
     return o;
 }
 
 void Layer::calculate_weight_deltas(float *output_diff) {
     double f1Val;
+    int index = 0;
     for (int n = 0; n < n_count; n++) {
         f1Val = ac_f1(combined_signal(n));
         for (int w = 0; w < w_count; w++) {
-            deltas[arr_pos(n, w)] = dropout(lf * output_diff[n] * f1Val * inputs[w]);
+            deltas[index] = dropout(lf * output_diff[n] * f1Val * inputs[w]);
+            index++;
         }
     }
 }
 
 void Layer::apply_weight_deltas() {
+    int index = 0;
     for (int n = 0; n < n_count; n++) {
         for (int w = 0; w < n_count; w++) {
-            weights[arr_pos(n, w)] -= deltas[arr_pos(n, w)];
-            deltas[arr_pos(n, w)] = 0;
+            weights[index] -= deltas[index];
+            deltas[index] = 0;
+            index++;
         }
     }
 }
 
 float Layer::dropout(float x) {
-	if((rand_int() & 1) == 1)
+	if(random() & 1)
 		return x;
 	return 0;
 }
 
-int Layer::rand_int() {
-	return random();
-}
-
 float Layer::rand_float() {
 	return (float)random() / (float)(RAND_MAX);
-}
-
-int Layer::get_w_size() {
-	return w_count;
-}
-
-int Layer::get_n_size() {
-	return n_count;
 }
 
 #endif /* LAYER_H_ */

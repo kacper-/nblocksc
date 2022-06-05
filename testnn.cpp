@@ -10,6 +10,7 @@
 #include"testdata.h"
 
 float const LF = 0.1;
+int const REPS = 25000;
 
 void print_vector(float *s, float *result);
 long get_millis();
@@ -23,7 +24,7 @@ int main(int argc, char *argv[]) {
 	std::cout << "training..." << std::endl;
 	
 	long start = get_millis();
-	train(&net, input_s, input_e, COUNT, 25000);
+	train(&net, input_s, input_e, COUNT, REPS);
 	long stop = get_millis();
 
 	std::cout << "results..." << std::endl;
