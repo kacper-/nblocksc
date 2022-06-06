@@ -10,7 +10,7 @@
 #include"testdata.h"
 
 float const LF = 0.1;
-int const REPS = 20000;
+int const REPS = 25000;
 
 void print_vector(float *s, float *result);
 long get_millis();
