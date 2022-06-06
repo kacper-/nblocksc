@@ -20,7 +20,6 @@ class Layer {
     void init_weights();
     void init_inputs();
     void init_outputs();
-    void save_inputs(float*);
     float ac_f(float);
     float ac_f1(float);
     float combined_signal(int);
@@ -79,15 +78,11 @@ void Layer::init_outputs() {
 }
 
 void Layer::process(float *signal) {
-	save_inputs(signal);
+	for (int w = 0; w < w_count; w++) 
+        inputs[w] = signal[w];
+    
     for (int n = 0; n < n_count; n++) 
         outputs[n] = ac_f(combined_signal(n));
-}
-
-void Layer::save_inputs(float *signal) {
-    for (int w = 0; w < w_count; w++) {
-        inputs[w] = signal[w];
-    }
 }
 
 float Layer::ac_f(float x) {
@@ -95,16 +90,8 @@ float Layer::ac_f(float x) {
 }
 
 float Layer::ac_f1(float x) {
-	return 1 / (1+abs(2*x)+x*x);
+	return 1 / (1 + abs(2 * x) + (x * x));
 }
-
-// float Layer::ac_f(float x) {
-// 	return tanh(x);
-// }
-
-// float Layer::ac_f1(float x) {
-// 	return 1 - pow(tanh(x), 2);
-// }
 
 float Layer::combined_signal(int n) {
     float o = 0;
@@ -136,7 +123,6 @@ void Layer::apply_weight_deltas() {
     for (int n = 0; n < n_count; n++) {
         for (int w = 0; w < n_count; w++) {
             weights[index] -= deltas[index];
-            deltas[index] = 0;
             index++;
         }
     }

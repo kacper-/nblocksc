@@ -15,9 +15,9 @@
 class Net {
 	Layer *front, *back, *middle, *middle2;
 	int size;
-	float* calculate_back_error(float*, float*, int, float*);
+	void calculate_back_error(float*, float*, int, float*);
 	void apply();
-	float* calculate_error(float*, float*, int, int, float*);
+	void calculate_error(float*, float*, int, int, float*);
 public:
 	Net(int, int, float);
 	~Net();
@@ -52,9 +52,9 @@ void Net::process(float *signal, float *result) {
 	middle->process(front->outputs);
 	middle2->process(middle->outputs);
 	back->process(middle2->outputs);
-    for (int i = 0; i < size; i++) {
+    
+	for (int i = 0; i < size; i++) 
     	result[i] = back->outputs[i];
-	}
 }
 
 void Net::teach(float *signal, float *expected) {
@@ -75,11 +75,9 @@ void Net::teach(float *signal, float *expected) {
     apply();
 }
 
-float* Net::calculate_back_error(float *result, float *expected, int size, float *error) {
-    for (int i = 0; i < size; i++) {
+void Net::calculate_back_error(float *result, float *expected, int size, float *error) {
+    for (int i = 0; i < size; i++) 
         error[i] = result[i] - expected[i];
-    }
-    return error;
 }
 
 void Net::apply() {
@@ -89,13 +87,12 @@ void Net::apply() {
     back->apply_weight_deltas();
 }
 
-float* Net::calculate_error(float *weights, float *error, int n_size, int w_size, float *result) {
+void Net::calculate_error(float *weights, float *error, int n_size, int w_size, float *result) {
     for (int w = 0; w < w_size; w++) {
     	result[w] = 0;
         for (int n = 0; n < n_size; n++)
             result[w] += weights[(n * w_size) + w] * error[n];
     }
-    return result;
 }
 
 int Net::get_input_size() {
