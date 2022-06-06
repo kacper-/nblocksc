@@ -16,10 +16,12 @@ class Layer {
 	float lf;
 	float *deltas;
 	float *inputs;
+    float *cs;
 	int arr_size;
     void init_weights();
     void init_inputs();
     void init_outputs();
+    void init_cs();
     float ac_f(float);
     float ac_f1(float);
     float combined_signal(int);
@@ -47,6 +49,7 @@ Layer::Layer(int n_count, int w_count, float lf) {
     init_weights();
     init_inputs();
     init_outputs();
+    init_cs();
 }
 
 Layer::~Layer() {
@@ -54,6 +57,7 @@ Layer::~Layer() {
 	delete[] inputs;
 	delete[] outputs;
 	delete[] weights;
+    delete[] cs;
 }
 
 void Layer::init_weights() {
@@ -77,12 +81,22 @@ void Layer::init_outputs() {
 	outputs = new float[n_count];
 }
 
+void Layer::init_cs() {
+    cs = new float[n_count];
+}
+
+float Layer::rand_float() {
+	return (float)random() / (float)(RAND_MAX);
+}
+
 void Layer::process(float *signal) {
 	for (int w = 0; w < w_count; w++) 
         inputs[w] = signal[w];
     
-    for (int n = 0; n < n_count; n++) 
-        outputs[n] = ac_f(combined_signal(n));
+    for (int n = 0; n < n_count; n++) {
+        cs[n] = combined_signal(n);
+        outputs[n] = ac_f(cs[n]);
+    }
 }
 
 float Layer::ac_f(float x) {
@@ -107,29 +121,17 @@ void Layer::calculate_weight_deltas(float *output_diff) {
     double f1Val;
     int index = 0;
     for (int n = 0; n < n_count; n++) {
-        f1Val = ac_f1(combined_signal(n));
-        for (int w = 0; w < w_count; w++) {
-            if(random() & 1)
-                deltas[index] = lf * output_diff[n] * f1Val * inputs[w];
-            else
-                deltas[index] = 0;
+        f1Val = lf * output_diff[n] * ac_f1(cs[n]);
+        for (int w = 0; w < w_count; w++) {            
+            deltas[index] = (random() & 1) * f1Val * inputs[w];        
             index++;
         }
     }
 }
 
 void Layer::apply_weight_deltas() {
-    int index = 0;
-    for (int n = 0; n < n_count; n++) {
-        for (int w = 0; w < n_count; w++) {
-            weights[index] -= deltas[index];
-            index++;
-        }
-    }
-}
-
-float Layer::rand_float() {
-	return (float)random() / (float)(RAND_MAX);
+    for (int i = 0; i < arr_size; i++)
+        weights[i] -= deltas[i];
 }
 
 #endif /* LAYER_H_ */
