@@ -24,7 +24,6 @@ class Layer {
     float ac_f(float);
     float ac_f1(float);
     float combined_signal(int);
-    float dropout(float);
     int rand_int();
     float rand_float();
 public:
@@ -96,7 +95,7 @@ float Layer::ac_f(float x) {
 }
 
 float Layer::ac_f1(float x) {
-	return 1 / pow(1 + abs(x), 2);
+	return 1 / (1+abs(2*x)+x*x);
 }
 
 // float Layer::ac_f(float x) {
@@ -123,7 +122,10 @@ void Layer::calculate_weight_deltas(float *output_diff) {
     for (int n = 0; n < n_count; n++) {
         f1Val = ac_f1(combined_signal(n));
         for (int w = 0; w < w_count; w++) {
-            deltas[index] = dropout(lf * output_diff[n] * f1Val * inputs[w]);
+            if(random() & 1)
+                deltas[index] = lf * output_diff[n] * f1Val * inputs[w];
+            else
+                deltas[index] = 0;
             index++;
         }
     }
@@ -138,12 +140,6 @@ void Layer::apply_weight_deltas() {
             index++;
         }
     }
-}
-
-float Layer::dropout(float x) {
-	if(random() & 1)
-		return x;
-	return 0;
 }
 
 float Layer::rand_float() {
