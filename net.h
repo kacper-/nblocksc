@@ -16,7 +16,6 @@ class Net {
 	Layer *front, *back, *middle, *middle2;
 	int size;
 	void calculate_back_error(float*, float*, int, float*);
-	void apply();
 	void calculate_error(float*, float*, int, int, float*);
 public:
 	Net(int, int, float);
@@ -58,33 +57,37 @@ void Net::process(float *signal, float *result) {
 }
 
 void Net::teach(float *signal, float *expected) {
-	float result[back->n_count];
-	process(signal, result);
+	front->process(signal);
+	middle->process(front->outputs);
+	middle2->process(middle->outputs);
+	back->process(middle2->outputs);
+
 	float back_error[back->n_count];
-	calculate_back_error(result, expected, back->n_count, back_error);
+	calculate_back_error(back->outputs, expected, back->n_count, back_error);
+
 	float middle2_error[middle2->w_count];
 	calculate_error(back->weights, back_error, middle2->n_count, middle2->w_count, middle2_error);
+
 	float middle_error[middle->w_count];
 	calculate_error(middle2->weights, middle2_error, middle->n_count, middle->w_count, middle_error);
+
 	float front_error[front->w_count];
 	calculate_error(middle->weights, middle_error, front->n_count, front->w_count, front_error);
+
     back->calculate_weight_deltas(back_error);
     middle2->calculate_weight_deltas(middle2_error);
-    middle->calculate_weight_deltas(middle_error);
-    front->calculate_weight_deltas(front_error);
-    apply();
+	middle->calculate_weight_deltas(middle_error);
+	front->calculate_weight_deltas(front_error);
+
+    front->apply_weight_deltas();
+    middle->apply_weight_deltas();
+    middle2->apply_weight_deltas();
+    back->apply_weight_deltas();
 }
 
 void Net::calculate_back_error(float *result, float *expected, int size, float *error) {
     for (int i = 0; i < size; i++) 
         error[i] = result[i] - expected[i];
-}
-
-void Net::apply() {
-    front->apply_weight_deltas();
-    middle->apply_weight_deltas();
-    middle2->apply_weight_deltas();
-    back->apply_weight_deltas();
 }
 
 void Net::calculate_error(float *weights, float *error, int n_size, int w_size, float *result) {
