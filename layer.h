@@ -120,10 +120,11 @@ float Layer::combined_signal(int n) {
 void Layer::calculate_weight_deltas(float *output_diff) {
     double f1Val;
     int index = 0;
+    long r = random();
     for (int n = 0; n < n_count; n++) {
         f1Val = lf * output_diff[n] * ac_f1(cs[n]);
         for (int w = 0; w < w_count; w++) {            
-            deltas[index] = (random() & 1) * f1Val * inputs[w];        
+            deltas[index] = ((r >> (w % 16)) & 1) * f1Val * inputs[w];        
             index++;
         }
     }
