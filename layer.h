@@ -18,6 +18,7 @@ class Layer {
 	float *inputs;
     float *cs;
 	int arr_size;
+    int mem_size;
     void init_weights();
     void init_inputs();
     void init_outputs();
@@ -42,6 +43,7 @@ Layer::Layer(int n_count, int w_count, float lf) {
 	this->w_count = w_count;
 	this->lf = lf;
 	arr_size = n_count * w_count;
+    mem_size = sizeof(inputs) * w_count;
 	srandom((unsigned)time(0));
     init_weights();
     init_inputs();
@@ -80,11 +82,11 @@ void Layer::init_outputs() {
 
 void Layer::init_cs() {
     cs = new float[n_count];
+
 }
 
 void Layer::process(float *signal) {
-    for(int i=0;i<w_count;i++) 
-        inputs[i] = signal[i];
+    memcpy(inputs, signal, mem_size);
 
     for(int i=0;i<n_count;i++) 
         cs[i] = 0;
