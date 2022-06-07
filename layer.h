@@ -86,7 +86,8 @@ void Layer::init_cs() {
 }
 
 void Layer::process(float *signal) {
-    memcpy(inputs, signal, mem_size);
+    for(int i=0;i<w_count;i++) 
+        inputs[i] = signal[i];
 
     for(int i=0;i<n_count;i++) 
         cs[i] = 0;
