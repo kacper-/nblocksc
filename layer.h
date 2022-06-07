@@ -83,10 +83,12 @@ void Layer::init_cs() {
 }
 
 void Layer::process(float *signal) {
-    for(int i=0;i<n_count;i++) {
-        cs[i] = 0;
+    for(int i=0;i<w_count;i++) 
         inputs[i] = signal[i];
-    }
+
+    for(int i=0;i<n_count;i++) 
+        cs[i] = 0;
+
     int index = 0;
     for (int n = 0; n < n_count; n++) {
         for (int w = 0; w < w_count; w++) {
@@ -101,6 +103,7 @@ void Layer::calculate_weight_deltas(float *output_diff) {
     double f1Val;
     int index = 0;
     long r;
+
     for (int n = 0; n < n_count; n++) {
         r = random();
         f1Val = lf * output_diff[n] / ((1 + abs(2 * cs[n]) + (cs[n] * cs[n])));
