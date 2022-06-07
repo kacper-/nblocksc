@@ -22,11 +22,8 @@ class Layer {
     void init_inputs();
     void init_outputs();
     void init_cs();
-    float ac_f(float);
-    float ac_f1(float);
     float combined_signal(int);
     int rand_int();
-    float rand_float();
 public:
 	Layer(int, int, float);
 	~Layer();
@@ -66,7 +63,7 @@ void Layer::init_weights() {
     int index = 0;
     for (int n = 0; n < n_count; n++) {
         for (int w = 0; w < w_count; w++) {
-            weights[index] = rand_float() * init_limit;
+            weights[index] = init_limit * random() / (float)(RAND_MAX);;
             deltas[index] = 0;
             index++;
         }
@@ -85,36 +82,19 @@ void Layer::init_cs() {
     cs = new float[n_count];
 }
 
-float Layer::rand_float() {
-	return (float)random() / (float)(RAND_MAX);
-}
-
 void Layer::process(float *signal) {
-	for (int w = 0; w < w_count; w++) 
-        inputs[w] = signal[w];
-    
+    for(int i=0;i<n_count;i++) {
+        cs[i] = 0;
+        inputs[i] = signal[i];
+    }
+    int index = 0;
     for (int n = 0; n < n_count; n++) {
-        cs[n] = combined_signal(n);
-        outputs[n] = ac_f(cs[n]);
+        for (int w = 0; w < w_count; w++) {
+            cs[n] += weights[index] * inputs[w];
+            index++;
+        }     
+        outputs[n] = cs[n] / (1 + abs(cs[n]));   
     }
-}
-
-float Layer::ac_f(float x) {
-	return x / (1 + abs(x));
-}
-
-float Layer::ac_f1(float x) {
-	return 1 / (1 + abs(2 * x) + (x * x));
-}
-
-float Layer::combined_signal(int n) {
-    float o = 0;
-    int index = n * w_count;
-    for (int w = 0; w < w_count; w++) {
-        o += weights[index] * inputs[w];
-        index++;
-    }
-    return o;
 }
 
 void Layer::calculate_weight_deltas(float *output_diff) {
@@ -123,7 +103,7 @@ void Layer::calculate_weight_deltas(float *output_diff) {
     long r;
     for (int n = 0; n < n_count; n++) {
         r = random();
-        f1Val = lf * output_diff[n] * ac_f1(cs[n]);
+        f1Val = lf * output_diff[n] / ((1 + abs(2 * cs[n]) + (cs[n] * cs[n])));
         for (int w = 0; w < w_count; w++) {            
             deltas[index] = ((r >> (w % 16)) & 1) * f1Val * inputs[w];        
             index++;
