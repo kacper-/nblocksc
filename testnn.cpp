@@ -19,18 +19,13 @@ int main(int argc, char *argv[]) {
 	std::cout << "training..." << std::endl;
 	
 	long start = get_millis();
-	struct net ann = train(input_s, input_e, COUNT);
+	train(input_s, input_e, COUNT);
 	long stop = get_millis();
 
 	std::cout << "results..." << std::endl;
 	for(int i=0;i<COUNT;i++) {
 		s = input_s + (i * SIZE);
-		process(
-			ann.front.cs, ann.front.outputs, ann.front.deltas, ann.front.weights, 
-			ann.middle.cs, ann.middle.outputs, ann.middle.deltas, ann.middle.weights, 
-			ann.middle2.cs, ann.middle2.outputs, ann.middle2.deltas, ann.middle2.weights, 
-			ann.back.cs, ann.back.outputs, ann.back.deltas, ann.back.weights, 
-		s, result);
+		process(s, result);
 		print_vector(s, result);
 	}
 

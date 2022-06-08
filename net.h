@@ -8,7 +8,6 @@
 #ifndef NET_H_
 #define NET_H_
 
-
 #include<fcntl.h>
 #include<stdio.h>
 #include<stdlib.h>
@@ -24,29 +23,39 @@ float const LF = 0.1;
 int const REPS = 25000;
 float const INIT_LIMIT = 0.05;
 
-struct layer {
-    float cs[SIZE];
-	float outputs[SIZE];
-	float deltas[ARR_SIZE];
-	float weights[ARR_SIZE];
-};
+float back_error[SIZE];
+float middle2_error[SIZE];
+float middle_error[SIZE];
+float front_error[SIZE];
 
-void layer_init(float weights[], float deltas[]);
-void layer_process(float cs[], float outputs[], float deltas[], float weights[], float signal[]);
-void calculate_weight_deltas(float cs[], float deltas[], float output_diff[], float signal[]);
-void apply_weight_deltas(float weights[], float deltas[]);
+float back_cs[SIZE];
+float middle2_cs[SIZE];
+float middle_cs[SIZE];
+float front_cs[SIZE];
 
-void layer_init(float weights[], float deltas[]) {	
+float back_outputs[SIZE];
+float middle2_outputs[SIZE];
+float middle_outputs[SIZE];
+float front_outputs[SIZE];
+
+float back_deltas[ARR_SIZE];
+float middle2_deltas[ARR_SIZE];
+float middle_deltas[ARR_SIZE];
+float front_deltas[ARR_SIZE];
+
+float back_weights[ARR_SIZE];
+float middle2_weights[ARR_SIZE];
+float middle_weights[ARR_SIZE];
+float front_weights[ARR_SIZE];
+
+void layer_init(float *const weights, float *const deltas) {	
     for (int i = 0; i < ARR_SIZE; i++) {        
 		weights[i] = INIT_LIMIT * random() / (float)(RAND_MAX);;
 		deltas[i] = 0;        
     }
 }
 
-void layer_process(float cs[], float outputs[], float deltas[], float weights[], float signal[]) {
-    for(int i=0;i<SIZE;i++) 
-        cs[i] = 0;
-
+void layer_process(float *const cs, float *const outputs, float *const deltas, float *const weights, float *const signal) {
     int index = 0;
     for (int n = 0; n < SIZE; n++) {
         for (int w = 0; w < SIZE; w++) {
@@ -57,7 +66,7 @@ void layer_process(float cs[], float outputs[], float deltas[], float weights[],
     }
 }
 
-void calculate_weight_deltas(float cs[], float deltas[], float output_diff[], float signal[]) {
+void calculate_weight_deltas(float *const cs, float *const deltas, float *const output_diff, float *const signal) {
     double f1Val;
     int index = 0;
     long r;
@@ -72,37 +81,23 @@ void calculate_weight_deltas(float cs[], float deltas[], float output_diff[], fl
     }
 }
 
-void apply_weight_deltas(float weights[], float deltas[]) {
-    for (int i = 0; i < ARR_SIZE; i++)
-        weights[i] -= deltas[i];
+inline void calculate_error(float *const weights, float *const error, float *const result) {
+	int index;
+    for (int n = 0; n < SIZE; n++) {
+		index = n * SIZE;    	
+        for (int w = 0; w < SIZE; w++)
+            result[w] += weights[index + w] * error[n];
+    }
 }
 
-
-struct net {
-	struct layer front;
-	struct layer back;
-	struct layer middle;
-	struct layer middle2;
-};
-
-void calculate_back_error(float result[], float expected[], float error[]);
-void calculate_error(float weights[], float error[], float result[]);
-void process(	float front_cs[], float front_outputs[], float front_deltas[], float front_weights[],
-	float middle_cs[], float middle_outputs[], float middle_deltas[], float middle_weights[],
-	float middle2_cs[], float middle2_outputs[], float middle2_deltas[], float middle2_weights[],
-	float back_cs[], float back_outputs[], float back_deltas[], float back_weights[],
- float signal[], float result[]);
-void teach(	float front_cs[], float front_outputs[], float front_deltas[], float front_weights[],
-	float middle_cs[], float middle_outputs[], float middle_deltas[], float middle_weights[],
-	float middle2_cs[], float middle2_outputs[], float middle2_deltas[], float middle2_weights[],
-	float back_cs[], float back_outputs[], float back_deltas[], float back_weights[], float signal[], float expected[]);
-
-void process(	
-	float front_cs[], float front_outputs[], float front_deltas[], float front_weights[],
-	float middle_cs[], float middle_outputs[], float middle_deltas[], float middle_weights[],
-	float middle2_cs[], float middle2_outputs[], float middle2_deltas[], float middle2_weights[],
-	float back_cs[], float back_outputs[], float back_deltas[], float back_weights[],
-	 float signal[], float result[]) {
+void process(float *const signal, float *const result) 
+	{
+	for (int i = 0; i < SIZE; i++) {
+		back_cs[i] = 0;
+		middle2_cs[i] = 0;
+		middle_cs[i] = 0;
+		front_cs[i] = 0;
+	}		
 	layer_process(front_cs, front_outputs, front_deltas, front_weights, signal);
 	layer_process(middle_cs, middle_outputs, middle_deltas, middle_weights, front_outputs);
 	layer_process(middle2_cs, middle2_outputs, middle2_deltas, middle2_weights, middle_outputs);
@@ -112,28 +107,29 @@ void process(
     	result[i] = back_outputs[i];
 }
 
-void teach(
-	float front_cs[], float front_outputs[], float front_deltas[], float front_weights[],
-	float middle_cs[], float middle_outputs[], float middle_deltas[], float middle_weights[],
-	float middle2_cs[], float middle2_outputs[], float middle2_deltas[], float middle2_weights[],
-	float back_cs[], float back_outputs[], float back_deltas[], float back_weights[],
-	float signal[], float expected[]) 
+void teach(float *const signal, float *const expected) 
 	{
+	
+	for (int i = 0; i < SIZE; i++) {
+    	middle2_error[i] = 0;
+		middle_error[i] = 0;
+		front_error[i] = 0;
+		back_cs[i] = 0;
+		middle2_cs[i] = 0;
+		middle_cs[i] = 0;
+		front_cs[i] = 0;
+	}
+
 	layer_process(front_cs, front_outputs, front_deltas, front_weights, signal);
 	layer_process(middle_cs, middle_outputs, middle_deltas, middle_weights, front_outputs);
 	layer_process(middle2_cs, middle2_outputs, middle2_deltas, middle2_weights, middle_outputs);
 	layer_process(back_cs, back_outputs, back_deltas, back_weights, middle2_outputs);
 
-	float back_error[SIZE];
-	calculate_back_error(back_outputs, expected, back_error);
+	for (int i = 0; i < SIZE; i++) 
+        back_error[i] = back_outputs[i] - expected[i];
 
-	float middle2_error[SIZE];
 	calculate_error(back_weights, back_error, middle2_error);
-
-	float middle_error[SIZE];
 	calculate_error(middle2_weights, middle2_error, middle_error);
-
-	float front_error[SIZE];
 	calculate_error(middle_weights, middle_error, front_error);
 
     calculate_weight_deltas(back_cs, back_deltas, back_error, middle2_outputs);
@@ -141,52 +137,27 @@ void teach(
 	calculate_weight_deltas(middle_cs, middle_deltas, middle_error, front_outputs);
 	calculate_weight_deltas(front_cs, front_deltas, front_error, signal);
 
-    apply_weight_deltas(back_weights, back_deltas);
-    apply_weight_deltas(middle2_weights, middle2_deltas);
-    apply_weight_deltas(middle_weights, middle_deltas);
-    apply_weight_deltas(front_weights, front_deltas);
-}
-
-void calculate_back_error(float result[], float expected[], float error[]) {
-    for (int i = 0; i < SIZE; i++) 
-        error[i] = result[i] - expected[i];
-}
-
-void calculate_error(float weights[], float error[], float result[]) {
-    for (int w = 0; w < SIZE; w++) {
-    	result[w] = 0;
+	for (int i = 0; i < ARR_SIZE; i++) {
+        back_weights[i] -= back_deltas[i];
+		middle2_weights[i] -= middle2_deltas[i];	
+		middle_weights[i] -= middle_deltas[i];	
+		front_weights[i] -= front_deltas[i];
 	}
-
-	int index;
-    for (int n = 0; n < SIZE; n++) {
-		index = n * SIZE;    	
-        for (int w = 0; w < SIZE; w++)
-            result[w] += weights[index + w] * error[n];
-    }
 }
 
-struct net train(float signal[], float expected[], int count) {	
-	struct net ann;
-	
+void train(float *const signal, float *const expected, int count) {	
 	srandom((unsigned)time(0));
 
-	layer_init(ann.front.weights, ann.front.deltas);
-	layer_init(ann.back.weights, ann.back.deltas);
-	layer_init(ann.middle.weights, ann.middle.deltas);
-	layer_init(ann.middle2.weights, ann.middle2.deltas);	
+	layer_init(front_weights, front_deltas);
+	layer_init(back_weights, back_deltas);
+	layer_init(middle_weights, middle_deltas);
+	layer_init(middle2_weights, middle2_deltas);	
 
 	int j;
     for (int i = 0; i < REPS; i++) {
         j = (random() % count) * SIZE;
-        teach(	
-			ann.front.cs, ann.front.outputs, ann.front.deltas, ann.front.weights,
-			ann.middle.cs, ann.middle.outputs, ann.middle.deltas, ann.middle.weights,
-			ann.middle2.cs, ann.middle2.outputs, ann.middle2.deltas, ann.middle2.weights,
-			ann.back.cs, ann.back.outputs, ann.back.deltas, ann.back.weights, 
-			signal + j, expected + j);
+        teach(signal + j, expected + j);
     }
-
-	return ann;
 }
 
 #endif /* NET_H_ */
