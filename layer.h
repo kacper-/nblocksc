@@ -84,8 +84,7 @@ void Layer::init_cs() {
 }
 
 void Layer::process(float *signal) {
-
-    for(int i=0;i<w_count;i++) 
+    for(int i=0;i<w_count;i++)  
         inputs[i] = signal[i];
 
     for(int i=0;i<n_count;i++) 
