@@ -55,7 +55,7 @@ float middle2_weights[ARR_SIZE];
 float middle_weights[ARR_SIZE];
 float front_weights[ARR_SIZE];
 
-void layer_process(float *const cs, float *const outputs, float *const deltas, float *const weights, float *const signal) {
+inline void layer_process(float *const cs, float *const outputs, float *const deltas, float *const weights, float *const signal) {
     int i = - SIZE;
     for (int n = 0; n < SIZE; n++) {
 		i += SIZE;  
@@ -68,11 +68,12 @@ void layer_process(float *const cs, float *const outputs, float *const deltas, f
 }
 
 void calculate_weight_deltas(float *const cs, float *const deltas, float *const output_diff, float *const signal) {
-    double f1Val;
+    float f1Val;
     int index = - SIZE;
     long r;
 
     for (int n = 0; n < SIZE; n++) {
+		// TODO move it outside, prepare pool of random values at the begining of training
         r = random();
         f1Val = LF * output_diff[n] / ((1 + abs(2 * cs[n]) + (cs[n] * cs[n])));
 		index += SIZE;  
@@ -89,40 +90,6 @@ void process(float *const signal, float *const result)
 	layer_process(cs.middle, middle_outputs, middle_deltas, middle_weights, front_outputs);
 	layer_process(cs.middle2, middle2_outputs, middle2_deltas, middle2_weights, middle_outputs);
 	layer_process(cs.back, back_outputs, back_deltas, back_weights, middle2_outputs);
-
-    // int i = - SIZE, n, w;
-    // for (n = 0; n < SIZE; n++) {
-	// 	i += SIZE;  
-    //     for (w = 0; w < SIZE; w++) 
-    //         cs.front[n] += front_weights[i + w] * signal[w];
-    // }
-	// for (i = 0; i < SIZE; i++)
-	// 	front_outputs[i] = cs.front[i] / (1 + abs(cs.front[i])); 
-
-    // for (n = 0; n < SIZE; n++) {
-	// 	i += SIZE;  
-    //     for (w = 0; w < SIZE; w++) 
-    //         cs.middle[n] += middle_weights[i + w] * front_outputs[w];
-    // }
-	// for (i = 0; i < SIZE; i++)
-	// 	middle_outputs[i] = cs.middle[i] / (1 + abs(cs.middle[i])); 
-
-    // for (n = 0; n < SIZE; n++) {
-	// 	i += SIZE;  
-    //     for (w = 0; w < SIZE; w++) 
-    //         cs.middle2[n] += middle2_weights[i + w] * middle_outputs[w];
-    // }
-	// for (i = 0; i < SIZE; i++)
-	// 	middle2_outputs[i] = cs.middle2[i] / (1 + abs(cs.middle2[i])); 
-
-    // for (n = 0; n < SIZE; n++) {
-	// 	i += SIZE;  
-    //     for (w = 0; w < SIZE; w++) 
-    //         cs.back[n] += back_weights[i + w] * middle2_outputs[w];
-    // }
-	// for (i = 0; i < SIZE; i++)
-	// 	back_outputs[i] = cs.back[i] / (1 + abs(cs.back[i])); 				
-
     
 	for (int i = 0; i < SIZE; i++) 
     	result[i] = back_outputs[i];
@@ -146,13 +113,6 @@ void teach(float *const signal, float *const expected)
 
 	for (i = 0; i < ARR_SIZE; i++) 
 		middle2_error[i & 63] += back_weights[i] * back_error[i >> 6];
-
-	// i = - SIZE;
-    // for (n = 0; n < SIZE; n++) {
-	// 	i += SIZE;  
-    //     for (w = 0; w < SIZE; w++) 
-    //         middle2_error[w] += back_weights[i + w] * back_error[n];
-    // }
     
     for (i = 0; i < ARR_SIZE; i++) 
         middle_error[i & 63] += middle2_weights[i] * middle2_error[i >> 6];
