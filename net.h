@@ -11,6 +11,7 @@
 
 #include"layer.h"
 
+const int SIZE = 64;
 
 class Net {
 	Layer *front, *back, *middle, *middle2;
@@ -104,6 +105,14 @@ int Net::get_input_size() {
 
 int Net::get_output_size() {
 	return back->n_count;
+}
+
+void train(Net *net, float *signal, float *expected, int size, int rep) {
+	int j;
+    for (int i = 0; i < rep; i++) {
+        j = random() % size;
+        net->teach(signal + (j * net->get_input_size()), expected + (j * net->get_output_size()));
+    }
 }
 
 #endif /* NET_H_ */
