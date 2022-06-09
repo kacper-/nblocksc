@@ -67,18 +67,17 @@ inline void layer_process(float *const cs, float *const outputs, float *const de
 		outputs[i] = cs[i] / (1 + abs(cs[i])); 
 }
 
-void calculate_weight_deltas(float *const cs, float *const deltas, float *const output_diff, float *const signal) {
+inline void calculate_weight_deltas(float *const cs, float *const deltas, float *const output_diff, float *const signal, float *const weights) {
     float f1Val;
     int index = - SIZE;
     long r;
 
     for (int n = 0; n < SIZE; n++) {
-		// TODO move it outside, prepare pool of random values at the begining of training
         r = random();
         f1Val = LF * output_diff[n] / ((1 + abs(2 * cs[n]) + (cs[n] * cs[n])));
 		index += SIZE;  
         for (int w = 0; w < SIZE; w++)          
-            deltas[index + w] = ((r >> (w & 15)) & 1) * f1Val * signal[w];        
+            deltas[index + w] = ((r >> (w & 31)) & 1) * f1Val * signal[w];        
     }
 }
 
@@ -107,25 +106,35 @@ void teach(float *const signal, float *const expected)
 	layer_process(cs.middle2, middle2_outputs, middle2_deltas, middle2_weights, middle_outputs);
 	layer_process(cs.back, back_outputs, back_deltas, back_weights, middle2_outputs);
 
-	int i, w, n;
-	for (i = 0; i < SIZE; i++) 
-		back_error[i] = back_outputs[i] - expected[i];
+	int i = - SIZE, w, n;
 
-	for (i = 0; i < ARR_SIZE; i++) 
-		middle2_error[i & 63] += back_weights[i] * back_error[i >> 6];
+	for (n = 0; n < SIZE; n++) {
+		i += SIZE;  
+		back_error[n] = back_outputs[n] - expected[n];
+        for (w = 0; w < SIZE; w++) 
+            middle2_error[w] += back_weights[i + w] * back_error[n];
+    }
     
-    for (i = 0; i < ARR_SIZE; i++) 
-        middle_error[i & 63] += middle2_weights[i] * middle2_error[i >> 6];
+	i = - SIZE;
+	for (n = 0; n < SIZE; n++) {
+		i += SIZE;  
+        for (w = 0; w < SIZE; w++) 
+            middle_error[w] += middle2_weights[i + w] * middle2_error[n];
+    }
 
-    for (i = 0; i < ARR_SIZE; i++) 
-        front_error[i & 63] += middle_weights[i] * middle_error[i >> 6];
+	i = - SIZE;
+	for (n = 0; n < SIZE; n++) {
+		i += SIZE;  
+        for (w = 0; w < SIZE; w++) 
+            front_error[w] += middle_weights[i + w] * middle_error[n];
+    }
 
-    calculate_weight_deltas(cs.back, back_deltas, back_error, middle2_outputs);
-    calculate_weight_deltas(cs.middle2, middle2_deltas, middle2_error, middle_outputs);
-	calculate_weight_deltas(cs.middle, middle_deltas, middle_error, front_outputs);
-	calculate_weight_deltas(cs.front, front_deltas, front_error, signal);
+    calculate_weight_deltas(cs.back, back_deltas, back_error, middle2_outputs, back_weights);
+    calculate_weight_deltas(cs.middle2, middle2_deltas, middle2_error, middle_outputs, middle2_weights);
+	calculate_weight_deltas(cs.middle, middle_deltas, middle_error, front_outputs, middle_weights);
+	calculate_weight_deltas(cs.front, front_deltas, front_error, signal, front_weights);
 
-	for (auto i = 0; i < ARR_SIZE; i++) {
+	for (i = 0; i < ARR_SIZE; i++) {
         back_weights[i] -= back_deltas[i];
 		middle2_weights[i] -= middle2_deltas[i];	
 		middle_weights[i] -= middle_deltas[i];	
@@ -136,15 +145,16 @@ void teach(float *const signal, float *const expected)
 void train(float *const signal, float *const expected, int count) {	
 	srandom((unsigned)time(0));
 	
-	for (int i = 0; i < ARR_SIZE; i++) {        
+	int i, j;
+
+	for (i = 0; i < ARR_SIZE; i++) {        
 		front_weights[i] = INIT_LIMIT * random() / (float)(RAND_MAX);
 		middle_weights[i] = front_weights[i];
 		middle2_weights[i] = front_weights[i];
 		back_weights[i] = front_weights[i];
     }
 
-	int j;
-    for (int i = 0; i < REPS; i++) {
+    for (i = 0; i < REPS; i++) {
         j = (random() % count) * SIZE;
         teach(signal + j, expected + j);
     }
