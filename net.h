@@ -56,10 +56,10 @@ float middle_weights[ARR_SIZE];
 float front_weights[ARR_SIZE];
 
 inline void layer_process(float *const cs, float *const outputs, float *const deltas, float *const weights, float *const signal) {
-    int i = - SIZE;
-    for (int n = 0; n < SIZE; n++) {
+    int i = - SIZE, w, n;
+    for (n = 0; n < SIZE; n++) {
 		i += SIZE;  
-        for (int w = 0; w < SIZE; w++) 
+        for (w = 0; w < SIZE; w++) 
             cs[n] += weights[i + w] * signal[w];
     }
 
@@ -69,15 +69,15 @@ inline void layer_process(float *const cs, float *const outputs, float *const de
 
 inline void calculate_weight_deltas(float *const cs, float *const deltas, float *const output_diff, float *const signal, float *const weights) {
     float f1Val;
-    int index = - SIZE;
+    int i = - SIZE, w, n;
     long r;
 
-    for (int n = 0; n < SIZE; n++) {
+    for (n = 0; n < SIZE; n++) {
         r = random();
         f1Val = LF * output_diff[n] / ((1 + abs(2 * cs[n]) + (cs[n] * cs[n])));
-		index += SIZE;  
-        for (int w = 0; w < SIZE; w++)          
-            deltas[index + w] = ((r >> (w & 31)) & 1) * f1Val * signal[w];        
+		i += SIZE;  
+        for (w = 0; w < SIZE; w++)          
+            deltas[i + w] = ((r >> (w & 31)) & 1) * f1Val * signal[w];        
     }
 }
 
