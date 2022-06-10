@@ -82,6 +82,16 @@ inline void calculate_weight_deltas(float *const cs, float *const deltas, float 
     }
 }
 
+inline void calculate_error(float *const error, float *const weights, float *const up_error) {
+	int i = - SIZE, w, n;
+
+	for (n = 0; n < SIZE; n++) {
+		i += SIZE;  		
+        for (w = 0; w < SIZE; w++) 
+            error[w] += weights[i + w] * up_error[n];
+    }
+}
+
 void process(float *const signal, float *const result) 
 	{
 	memset(&cs, 0, NBYTES4);
@@ -107,28 +117,12 @@ void teach(float *const signal, float *const expected)
 	layer_process(cs.middle2, middle2_outputs, middle2_deltas, middle2_weights, middle_outputs);
 	layer_process(cs.back, back_outputs, back_deltas, back_weights, middle2_outputs);
 
-	int i = - SIZE, w, n;
-
-	for (n = 0; n < SIZE; n++) {
-		i += SIZE;  
+	for (int n = 0; n < SIZE; n++)
 		back_error[n] = back_outputs[n] - expected[n];
-        for (w = 0; w < SIZE; w++) 
-            middle2_error[w] += back_weights[i + w] * back_error[n];
-    }
-    
-	i = - SIZE;
-	for (n = 0; n < SIZE; n++) {
-		i += SIZE;  
-        for (w = 0; w < SIZE; w++) 
-            middle_error[w] += middle2_weights[i + w] * middle2_error[n];
-    }
 
-	i = - SIZE;
-	for (n = 0; n < SIZE; n++) {
-		i += SIZE;  
-        for (w = 0; w < SIZE; w++) 
-            front_error[w] += middle_weights[i + w] * middle_error[n];
-    }
+	calculate_error(middle2_error, back_weights, back_error);
+	calculate_error(middle_error, middle2_weights, middle2_error);
+	calculate_error(front_error, middle_weights, middle_error);
 
     calculate_weight_deltas(cs.back, back_deltas, back_error, middle2_outputs, back_weights);
     calculate_weight_deltas(cs.middle2, middle2_deltas, middle2_error, middle_outputs, middle2_weights);
