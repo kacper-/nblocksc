@@ -21,6 +21,7 @@
 #include<iostream>
 #include<unistd.h>
 #include<string>
+#include<cstring>
 #include<math.h>
 #include<sys/time.h>
 
