@@ -129,7 +129,7 @@ void teach(float *const signal, float *const expected)
 	calculate_weight_deltas(cs.middle, middle_deltas, middle_error, front_outputs, middle_weights);
 	calculate_weight_deltas(cs.front, front_deltas, front_error, signal, front_weights);
 
-	for (i = 0; i < ARR_SIZE; i++) {
+	for (int i = 0; i < ARR_SIZE; i++) {
         back_weights[i] -= back_deltas[i];
 		middle2_weights[i] -= middle2_deltas[i];	
 		middle_weights[i] -= middle_deltas[i];	
