@@ -1,4 +1,4 @@
-int const COUNT = 36;
+int const COUNT = 72;
 	
 float input_s[] = {
 
