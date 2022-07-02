@@ -58,24 +58,26 @@ void print_vector(float *s, float *result) {
 	}
 
 	char a, a2;
-	if(index>25)
-		a = index+22;
+	int ind = index % 36;
+	int ind2 = index2 % 36;
+	if(ind>25)
+		a = ind+22;
 	else
-		a = index+65;
-	if(index2>25)
-		a2 = index2+22;
+		a = ind+65;
+	if(ind2>25)
+		a2 = ind2+22;
 	else
-		a2 = index2+65;
+		a2 = ind2+65;
 
 	for(int i=0;i<SIZE;i++) {
 		if(i % 8 == 0) {
 			if(i==24)
-				printf("\n%c (%.2f) ", a, max);
+				printf("\n%c %2d (%.2f) ", a, ind, max);
 			else {
 				if(i==32)
-					printf("\n%c (%.2f) ", a2, max2);
+					printf("\n%c %2d (%.2f) ", a2, ind2, max2);
 			 	else 
-					printf("\n         ");
+					printf("\n            ");
 			}
 		}
 		if(*(s + i) > 0.5)
