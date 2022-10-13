@@ -9,8 +9,9 @@
 #include"sys/time.h"
 #include"testdata.h"
 
-void print_vector(float *s, float *result);
+void print_vector(float *s, float *result, int c_int);
 long get_millis();
+int accuracy = 0;
 
 int main(int argc, char *argv[]) {
 	float result[SIZE];
@@ -26,10 +27,11 @@ int main(int argc, char *argv[]) {
 	for(int i=0;i<COUNT;i++) {
 		s = input_s + (i * SIZE);
 		process(s, result);
-		print_vector(s, result);
+		print_vector(s, result, i);
 	}
 
-	std::cout << std::endl << "finished in " << stop-start << " msec" << std::endl;
+	std::cout << std::endl << "accuracy " << accuracy << " / " << COUNT << std::endl;
+	std::cout << "finished in " << stop-start << " msec" << std::endl;
 
     return 0;
 }
@@ -40,7 +42,7 @@ long get_millis() {
 	return tp.tv_sec * 1000 + tp.tv_usec / 1000;
 }
 
-void print_vector(float *s, float *result) {
+void print_vector(float *s, float *result, int c_int) {
 	int index = 0, index2 = 0;
 	float max = 0, max2 = 0;
 	for(int i=0;i<SIZE;i++) {
@@ -58,24 +60,29 @@ void print_vector(float *s, float *result) {
 	}
 
 	char a, a2;
-	int ind = index % 36;
-	int ind2 = index2 % 36;
-	if(ind>25)
-		a = ind+22;
-	else
-		a = ind+65;
-	if(ind2>25)
-		a2 = ind2+22;
-	else
-		a2 = ind2+65;
-
+	if(index < 36) {
+		if(index>25)
+			a = index+22;
+		else
+			a = index+65;
+	} else {
+		a = 32;
+	}
+	if(index2 < 36) {
+		if(index2>25)
+			a2 = index2+22;
+		else
+			a2 = index2+65;
+	} else {
+		a2 = 32;
+	}
 	for(int i=0;i<SIZE;i++) {
 		if(i % 8 == 0) {
 			if(i==24)
-				printf("\n%c %2d (%.2f) ", a, ind, max);
+				printf("\n%c %2d (%.2f) ", a, index, max);
 			else {
 				if(i==32)
-					printf("\n%c %2d (%.2f) ", a2, ind2, max2);
+					printf("\n%c %2d (%.2f) ", a2, index2, max2);
 			 	else 
 					printf("\n            ");
 			}
@@ -85,5 +92,9 @@ void print_vector(float *s, float *result) {
 		else
 			printf(" ");
 	}
+
+	if((c_int % 36) == index)
+		accuracy++;
+
 	printf("\n");
 }

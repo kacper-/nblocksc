@@ -25,7 +25,7 @@
 #include<math.h>
 #include<sys/time.h>
 
-int const REPS = 25000;
+int const REPS = 30000;
 
 struct combined_signal {
 	float back[SIZE];
