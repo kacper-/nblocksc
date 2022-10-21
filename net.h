@@ -85,12 +85,6 @@ inline void calculate_weight_deltas(float *const cs, float *const deltas, float 
 inline void calculate_error(float *const error, float *const weights, float *const up_error) {
 	int i = - SIZE, w, n;
 
-	// for (n = 0; n < SIZE; n++) {
-	// 	i += SIZE;  		
-    //     for (w = 0; w < SIZE; w++) 
-    //         error[w] += weights[i + w] * up_error[n];
-    // }
-
 	for (n = 0; n < SIZE; n++) {
 		i += SIZE;  		
         for (w = 0; w < SIZE; w++) 
