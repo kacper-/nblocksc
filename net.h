@@ -9,7 +9,7 @@
 #define NET_H_
 
 #define SIZE 64
-#define ARR_SIZE 4096
+#define ARR_SIZE SIZE * SIZE
 #define NBYTES 256
 #define NBYTES4 1024
 #define LF 0.1
