@@ -12,7 +12,9 @@
 #define ARR_SIZE SIZE * SIZE
 #define NBYTES 256
 #define NBYTES4 1024
-#define LF 0.1
+#define LF 0.07
+#define PD 0.14
+#define MD 0.07
 #define INIT_LIMIT 0.05
 
 #include<fcntl.h>
@@ -69,16 +71,18 @@ inline void layer_process(float *const cs, float *const outputs, float *const de
 }
 
 inline void calculate_weight_deltas(float *const cs, float *const deltas, float *const output_diff, float *const signal, float *const weights) {
-    float f1Val;
+    float f1Val, f1Vals;
     int i = - SIZE, w, n;
     long r;
 
     for (n = 0; n < SIZE; n++) {
         r = random();
-        f1Val = LF * output_diff[n] / ((1 + abs(2 * cs[n]) + (cs[n] * cs[n])));
+		f1Val = LF * output_diff[n];
+		f1Vals = LF * output_diff[n] / ((1 + abs(2 * cs[n]) + (cs[n] * cs[n])));
 		i += SIZE;  
         for (w = 0; w < SIZE; w++)          
-            deltas[i + w] = ((r >> (w & 31)) & 1) * f1Val * signal[w];        
+            deltas[i + w] = ((r >> (w & 31)) & 1) * f1Val * signal[w];      
+			//deltas[i + w] = ((r >> (w & 31)) & 1) * f1Val * signal[w];     
     }
 }
 
