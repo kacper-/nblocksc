@@ -12,9 +12,6 @@
 #define ARR_SIZE SIZE * SIZE
 #define NBYTES 256
 #define NBYTES4 1024
-#define LF 0.07
-#define PD 0.14
-#define MD 0.07
 #define INIT_LIMIT 0.05
 
 #include<fcntl.h>
@@ -27,7 +24,10 @@
 #include<math.h>
 #include<sys/time.h>
 
-int const REPS = 30000;
+int const REPS = 80000;
+int const DIV = 10000;
+
+float LF[] = {0.035, 0.03, 0.025, 0.02, 0.018, 0.015, 0.012, 0.01};
 
 float back_error[SIZE];
 float middle2_error[SIZE];
@@ -60,14 +60,14 @@ inline void layer_process(float *const outputs, float *const deltas, float *cons
     } 
 }
 
-inline void calculate_weight_deltas(float *const deltas, float *const output_diff, float *const signal, float *const weights) {
+inline void calculate_weight_deltas(float *const deltas, float *const output_diff, float *const signal, float *const weights, float lf) {
     float f1Val, f1Vals;
     int i = - SIZE, w, n;
     long r;
 
     for (n = 0; n < SIZE; n++) {
         r = random();
-		f1Val = LF * output_diff[n];
+		f1Val = lf * output_diff[n];
 		i += SIZE;  
         for (w = 0; w < SIZE; w++)          
             deltas[i + w] = ((r >> (w & 31)) & 1) * f1Val * signal[w];          
@@ -82,7 +82,6 @@ inline void calculate_error(float *const error, float *const weights, float *con
         for (w = 0; w < SIZE; w++) 
             error[w] += weights[i + w] * up_error[n];
     }
-
 }
 
 void process(float *const signal, float *const result) 
@@ -96,11 +95,13 @@ void process(float *const signal, float *const result)
     	result[i] = back_outputs[i];
 }
 
-void teach(float *const signal, float *const expected) 
+void teach(float *const signal, float *const expected, int iter) 
 	{
 	memset(middle2_error, 0, NBYTES);
 	memset(middle_error, 0, NBYTES);
 	memset(front_error, 0, NBYTES);
+
+	float lf = LF[iter/DIV];
 
 	layer_process(front_outputs, front_deltas, front_weights, signal);
 	layer_process(middle_outputs, middle_deltas, middle_weights, front_outputs);
@@ -114,10 +115,10 @@ void teach(float *const signal, float *const expected)
 	calculate_error(middle_error, middle2_weights, middle2_error);
 	calculate_error(front_error, middle_weights, middle_error);
 
-    calculate_weight_deltas(back_deltas, back_error, middle2_outputs, back_weights);
-    calculate_weight_deltas(middle2_deltas, middle2_error, middle_outputs, middle2_weights);
-	calculate_weight_deltas(middle_deltas, middle_error, front_outputs, middle_weights);
-	calculate_weight_deltas(front_deltas, front_error, signal, front_weights);
+    calculate_weight_deltas(back_deltas, back_error, middle2_outputs, back_weights, lf);
+    calculate_weight_deltas(middle2_deltas, middle2_error, middle_outputs, middle2_weights, lf);
+	calculate_weight_deltas(middle_deltas, middle_error, front_outputs, middle_weights, lf);
+	calculate_weight_deltas(front_deltas, front_error, signal, front_weights, lf);
 
 	for (int i = 0; i < ARR_SIZE; i++) {
         back_weights[i] -= back_deltas[i];
@@ -141,7 +142,7 @@ void train(float *const signal, float *const expected, int count) {
 
     for (i = 0; i < REPS; i++) {
         j = (random() % count) * SIZE;
-        teach(signal + j, expected + j);
+        teach(signal + j, expected + j, i);
     }
 }
 
