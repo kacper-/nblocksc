@@ -17,6 +17,10 @@ int main(int argc, char *argv[]) {
 	float result[SIZE];
 	float *s;
 
+	std::cout << "loading training data..." << std::endl;
+
+	// TODO implement loading data and constants from config.txt and data.txt - then remove testdata.h as obsolete
+
 	std::cout << "training..." << std::endl;
 	
 	long start = get_millis();
