@@ -10,16 +10,27 @@
 #include"testdata.h"
 
 void print_vector(float *s, float *result, int c_int);
+void train();
+void run();
 long get_millis();
 int accuracy = 0;
 
 int main(int argc, char *argv[]) {
-	float result[SIZE];
-	float *s;
+
+	// TODO first step is to process command line arguments to know what to do
 
 	std::cout << "loading training data..." << std::endl;
 
 	// TODO implement loading data and constants from config.txt and data.txt - then remove testdata.h as obsolete
+
+	train();
+
+    return 0;
+}
+
+void train() {
+	float result[SIZE];
+	float *s;
 
 	std::cout << "training..." << std::endl;
 	
@@ -36,8 +47,10 @@ int main(int argc, char *argv[]) {
 
 	std::cout << std::endl << "accuracy " << accuracy << " / " << COUNT << std::endl;
 	std::cout << "finished in " << stop-start << " msec" << std::endl;
+}
 
-    return 0;
+void run() {
+	// TODO implement
 }
 
 long get_millis() {
