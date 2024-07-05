@@ -18,10 +18,7 @@ int accuracy = 0;
 int main(int argc, char *argv[]) {
 
 	// TODO first step is to process command line arguments to know what to do
-
-	std::cout << "loading training data..." << std::endl;
-
-	// TODO implement loading data and constants from config.txt and data.txt - then remove testdata.h as obsolete
+	// run();
 
 	train();
 
@@ -31,6 +28,11 @@ int main(int argc, char *argv[]) {
 void train() {
 	float result[SIZE];
 	float *s;
+
+	std::cout << "loading training data..." << std::endl;
+
+	// TODO implement loading data and constants from config.txt and data.txt - then remove testdata.h as obsolete
+	// add additional data file test.txt, that should be a test data run after training session
 
 	std::cout << "training..." << std::endl;
 	
