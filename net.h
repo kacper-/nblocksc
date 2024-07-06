@@ -12,8 +12,6 @@
 #define ARR_SIZE SIZE * SIZE
 #define NBYTES 256
 #define NBYTES4 1024
-#define LF 0.1
-#define INIT_LIMIT 0.05
 
 #include<fcntl.h>
 #include<stdio.h>
@@ -24,8 +22,6 @@
 #include<cstring>
 #include<math.h>
 #include<sys/time.h>
-
-int const REPS = 30000;
 
 struct combined_signal {
 	float back[SIZE];
@@ -56,6 +52,8 @@ float middle2_weights[ARR_SIZE];
 float middle_weights[ARR_SIZE];
 float front_weights[ARR_SIZE];
 
+float lf;
+
 inline void layer_process(float *const cs, float *const outputs, float *const deltas, float *const weights, float *const signal) {
     int i = - SIZE, w, n;
     for (n = 0; n < SIZE; n++) {
@@ -75,7 +73,7 @@ inline void calculate_weight_deltas(float *const cs, float *const deltas, float 
 
     for (n = 0; n < SIZE; n++) {
         r = random();
-        f1Val = LF * output_diff[n] / ((1 + abs(2 * cs[n]) + (cs[n] * cs[n])));
+        f1Val = lf * output_diff[n] / ((1 + abs(2 * cs[n]) + (cs[n] * cs[n])));
 		i += SIZE;  
         for (w = 0; w < SIZE; w++)          
             deltas[i + w] = ((r >> (w & 31)) & 1) * f1Val * signal[w];        
@@ -138,22 +136,32 @@ void teach(float *const signal, float *const expected)
 	}
 }
 
-void train(float *const signal, float *const expected, int count) {	
+void train(float *const signal, float *const expected, int count, float init_limit, int reps, float LF) {	
 	srandom((unsigned)time(0));
 	
 	int i, j;
 
+	lf = LF;
+
 	for (i = 0; i < ARR_SIZE; i++) {        
-		front_weights[i] = INIT_LIMIT * random() / (float)(RAND_MAX);
+		front_weights[i] = init_limit * random() / (float)(RAND_MAX);
 		middle_weights[i] = front_weights[i];
 		middle2_weights[i] = front_weights[i];
 		back_weights[i] = front_weights[i];
     }
 
-    for (i = 0; i < REPS; i++) {
+    for (i = 0; i < reps; i++) {
         j = (random() % count) * SIZE;
         teach(signal + j, expected + j);
     }
+}
+
+void save(char *arg) {
+	// TODO implement
+}
+
+void load(char *arg) {
+	// TODO implement
 }
 
 #endif /* NET_H_ */
