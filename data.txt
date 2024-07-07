@@ -790,9 +790,7 @@
 10000001
 01111110
 
-};
-
-floatinput_e[]={
+/*EXPECTED RESULTS*/
 
 /*A*/
 
