@@ -18,6 +18,8 @@
 #include<stdlib.h>
 #include<iostream>
 #include<unistd.h>
+#include<fstream>
+#include<sstream>
 #include<string>
 #include<cstring>
 #include<math.h>
@@ -157,11 +159,37 @@ void train(float *const signal, float *const expected, int count, float init_lim
 }
 
 void save(char *arg) {
-	// TODO implement
+	std::ofstream nnsave;
+	int i;
+  	nnsave.open (arg);
+
+	for(i=0;i<ARR_SIZE;i++)
+		nnsave << back_weights[i] << std::endl;
+	for(i=0;i<ARR_SIZE;i++)
+		nnsave << middle2_weights[i] << std::endl;
+	for(i=0;i<ARR_SIZE;i++)
+		nnsave << middle_weights[i] << std::endl;
+	for(i=0;i<ARR_SIZE;i++)
+		nnsave << front_weights[i] << std::endl;
+
+  	nnsave.close();
 }
 
 void load(char *arg) {
-	// TODO implement
+	std::ifstream nnsave;
+	int i;
+  	nnsave.open (arg);
+
+	for(i=0;i<ARR_SIZE;i++)
+		nnsave >> back_weights[i];
+	for(i=0;i<ARR_SIZE;i++)
+		nnsave >> middle2_weights[i];
+	for(i=0;i<ARR_SIZE;i++)
+		nnsave >> middle_weights[i];
+	for(i=0;i<ARR_SIZE;i++)
+		nnsave >> front_weights[i];
+
+  	nnsave.close();
 }
 
 #endif /* NET_H_ */
