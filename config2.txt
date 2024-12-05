@@ -1,4 +1,0 @@
-data_set_count=3
-lf=0.1
-init_limit=0.05
-reps=5000
